@@ -14,17 +14,17 @@ router不仅可以运行与client端，同时也被server端渲染支持
 		{
 			pattern: '/studentList',
 			action: 'App.studentList',
-      srender:false
+      		srender:false //关闭server渲染
 		}
 
 	);
   
-  sumeru.router.add(
+  	sumeru.router.add(
 
-  	{
+  		{
 			pattern: '/studentList',
 			action: 'App.studentList',
-      srender:'index.js'//开启server渲染
+      		srender:'index.js' //开启server渲染
 		}
 
 	);
