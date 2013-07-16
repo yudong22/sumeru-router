@@ -5,6 +5,12 @@ router不仅可以运行与client端，同时也被server端渲染支持
 
 一个Controller可以对应多个URL，一个URL只能对应一个Controller。
 
+server router 默认是开启的，当有不需要开启server render时，
+可以在app目录下config目录，添加设置,即可关闭，除了全局开关以外，还支持单个controller的禁用，如下add方法介绍
+
+	fw.config.set('runServerRender',false);
+
+
 * #### add()
 
   使用add()可以在router添加一组params与Controller的对于关系，方法如下：
@@ -14,34 +20,50 @@ router不仅可以运行与client端，同时也被server端渲染支持
 		{
 			pattern: '/studentList',
 			action: 'App.studentList',
-      		srender:false //关闭server渲染
-		}
+      		}
 
 	);
   
   	sumeru.router.add(
 
   		{
-			pattern: '/studentList',
+			pattern: '/studentList/index',
 			action: 'App.studentList',
-      		srender:'index.js' //开启server渲染
-		}
+			server_render:false
+      		}
 
 	);
 
 	* #### pattern
 
-		URL中params第一部分的值，
+		URL中的匹配值，patten中的匹配项会作为controller进行匹配，
+		特别的，当出现上面例子中都有 /studentList 的匹配中，会自动选取最长的进行匹配
     
 	* #### action
 
-		对应Controller的名称
-      
-  * #### srender
+		对应 可执行的JS的名称
+	
+ * ### 对一个链接的解析中，解析完controller之后，还有已/为分割的参数,如：
+	
+		localhost:8080/debug.html/studentList/index/123/007?p=2
+		
+	* #### arguments
 
-	会自动从controller目录下读取此项js文件,启用server渲染
+		除了自动匹配到 /controller是/studentList/index之外，还会将后面的参数 /123/007 作为
+		arguments传入env.arguments中，供程序直接使用。 
+		env.arguments形如
+		["/studentList/index","123","007"]
+       
+       * #### params
+       		params的取法可以用
+       		session.get("p")，也可以用params.p  以上两个结果都是"2"
+       
+  * #### server_render
+
+	设置了此项，此controller会禁用server渲染
 	
 	在router中添加了hash与Controller的对应关系后，
+	
 	就可以使用“localhost:8080/debug.html/studentList”运行params为"/studentList"对应的Controller。
 
 	同时我们还提供定义默认启动Controller的方法：
