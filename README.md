@@ -1,3 +1,13 @@
+## URI
+
+uri改造后，所有链接到本域下的a标签里面的link会被自动阻止默认行为，进行执行sumeru.redirect("link.")进行替代;
+
+* #### 标准格式
+  link里面的格式推荐格式：/{controller}/{arguments[1]}/{arguments[2]}/...?params1=string&params2=string
+
+* #### 向前兼容
+  以前的sumeru url的link的格式：#/{controller}!params1=string&params2=string，也会被自动解析为上面的标准格式
+
 ## Router
 
 router用于建立URL中params与Controller之间的对应关系，添加router的操作通常在Controller文件中一些定义。
