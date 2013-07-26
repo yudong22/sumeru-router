@@ -1,3 +1,56 @@
+## 升级到server渲染变更指引
+
+
+* 1.controller，onload写法
+
+	在controller中需要执行onload，所以在执行中需确保onload中，没有使用前端的js中的变量或函数，
+	
+	比如window，document，Localstorage，等
+
+* 2.配置
+
+	server渲染默认是开启的，当需要全部禁止时，修改config/sumeru.js中，添加一行
+	
+		sumeru.config({
+			runServerRender:false
+		})
+		
+	单个router禁止，添加一行在router中
+	
+		sumeru.router.add({
+		    pattern:'/test',
+		    action : 'App.unittest',
+		    server_render:false
+		})
+
+* 3.其他变更
+
+	* node执行环境
+		假设托管在bae上，app.conf需要修改为使用nodejs渲染
+
+			  - url : (.*)
+    			  script: $1.nodejs
+    			  
+	
+	* fileserver端口,现在由原来的fileserver/socketserver的端口号合二为一，只设置：httpServerPort 即可
+
+		
+		sumeru.config({
+   			httpServerPort: 8080
+		})
+		
+
+
+	* handlebars helper
+	由于server渲染不是读取前端设置的package.js，需要单独设置，
+	在sumeru/server_client/server_render.js  中，仿照下面的helper进行添加
+
+
+		var Handlebars = require(__dirname + "/../library/handlebars-1.0.0.beta.6.js");
+		
+    		require(__dirname+"/../library/handlebars-helper.js")(Handlebars);
+
+
 ## URI
 
 uri改造后，所有链接到本域下的a标签里面的link会被自动阻止默认行为，进行执行sumeru.redirect("link.")进行替代;
