@@ -42,13 +42,10 @@
 
 
 	* handlebars helper
-	由于server渲染不是读取前端设置的package.js，需要单独设置，
-	在sumeru/server_client/server_render.js  中，仿照下面的helper进行添加
-
-
-		var Handlebars = require(__dirname + "/../library/handlebars-1.0.0.beta.6.js");
-		
-    		require(__dirname+"/../library/handlebars-helper.js")(Handlebars);
+	由于server渲染开启后，会默认读取执行以下两个package的controller/package.js 和 server_config/package_afterload.js 
+	读取时机是启动node server加载完全部默认模块后
+	所以，比如有用户自定义的handlebars helper，可以在server_config/package_afterload.js里面进行包含
+	
 
 
 ## URI
