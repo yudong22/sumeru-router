@@ -42,11 +42,15 @@
 
 
 	* handlebars helper
-	由于server渲染开启后，会默认读取执行以下两个package的controller/package.js 和 server_config/package_afterload.js 
+	由于server渲染开启后，会默认读取执行以下两个package的controller/package.js 和 server_config/server_library.js 
 	读取时机是启动node server加载完全部默认模块后
-	所以，比如有用户自定义的handlebars helper，可以在server_config/package_afterload.js里面进行包含
-	
+	所以，比如有用户自定义的handlebars helper,或者其他library，如果要server渲染支持的话，要在server_config/server_library.js中包含
 
+		
+		sumeru.packages(
+	    		'../library/handlebars_helper.js'
+		);
+		
 
 ## URI
 
