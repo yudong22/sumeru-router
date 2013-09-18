@@ -1,6 +1,6 @@
-Sumeru提供了端到云关于文件的上传方法，使用简单几个步骤的配置即可实现上传到托管服务器，管理，更新，删除文件。
+Clouda提供了从端到云上传文件的方法，使用简单几步的配置即可实现端上的文件上传到托管服务器。
 
-此文档通过一个例子来说明一个文件上传与管理的过程。
+此文档通过一个例子来展示如何通过 Clouda 进行文件上传和管理。
 
 ### 1. 定义文件的数据Model
 在`app/model`目录下定义model,model的名称需要与第二步中model的订阅名称保持一致
@@ -83,7 +83,7 @@ fw.publish('fileModel', 'pub-upload-files', function(callback){
 
 ```
 ### 3. router定义上传
-哪一个`uri`是用于处理文件上传的，可由开发者在`app/config/router.js`中通过`pattern`自由定义。
+在`app/config/router.js`中，指定`uri`用于处理文件上传，可由开发者通过`pattern`自由定义。
 
 ```js
 sumeru.router.add({
@@ -98,7 +98,6 @@ sumeru.router.add({
 
 ```js
 var myUploader = new fileUploader({
-            // fileName:"myuploadFile",
             routerPath:"/files",
             form:document.getElementById("upload_form"),
             inputFile:document.getElementById("myfile1"),
