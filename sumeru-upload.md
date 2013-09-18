@@ -3,7 +3,7 @@ Sumeru提供了端到云关于文件的上传方法，使用简单几个步骤�
 此文档通过一个例子来说明一个文件上传与管理的过程。
 
 ### 1. 定义文件的数据Model
-在`app/model`目录下定义model,三方model定义与普通model定义完全一致
+在`app/model`目录下定义model,model的名称需要与第二步中model的订阅名称保持一致
 ```js
 Model.fileModel = function(exports){
     exports.config = {
@@ -19,7 +19,7 @@ Model.fileModel = function(exports){
 ```
 
 ### 2. 定义model的订阅，并添加联动方法
-保存上传文件的信息，用于以后通过浏览器进行更新/删除操作。
+在`app/publish`目录下定义订阅，保存上传文件的信息，用于以后通过浏览器进行更新/删除操作。
 
 ```js
 fw.publish('fileModel', 'pub-upload-files', function(callback){
@@ -83,7 +83,7 @@ fw.publish('fileModel', 'pub-upload-files', function(callback){
 
 ```
 ### 3. router定义上传
-哪一个`uri`是用于处理文件上传的，可由开发者在`router`中通过`pattern`自由定义。
+哪一个`uri`是用于处理文件上传的，可由开发者在`app/config/router.js`中通过`pattern`自由定义。
 
 ```js
 sumeru.router.add({
@@ -94,7 +94,7 @@ sumeru.router.add({
 });
 ```
 ### 4. 浏览器端上传文件
-此模块支持`显示进度`，`无刷新上传`，`自定义样式/uri`，`上传/修改/删除等对文件的控制`。
+此模块支持`显示进度`，`无刷新上传`，`自定义样式/uri`，`上传文件的服务端保存`。
 
 ```js
 var myUploader = new fileUploader({
@@ -162,8 +162,26 @@ var myUploader = new fileUploader({
         });
 ```
 
-开始上传：
+客户端上传文件方法：
 ```js
 myUploader.startUpload();
+```
+
+客户端修改文件方法：
+```js
+session.fileObj.update({
+    name   : newvalue//新文件名
+},{
+    smr_id : e.target.getAttribute('data-id')//smr_id db中的唯一id
+});
+session.fileObj.save();
+```
+
+客户端删除文件方法：
+```js
+session.fileObj.destroy({
+    smr_id  : e.target.getAttribute('data-id')//smr_id db中的唯一id
+});
+session.fileObj.save();
 ```
 
