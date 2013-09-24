@@ -22,54 +22,55 @@ sumeru.router.add({
 此模块支持`显示进度`，`无刷新上传`，`自定义样式/uri`，`上传文件的服务端保存`。
 
 ```js
-var myUploader = new fileUploader({
-            routerPath:"/files",
-            form:document.getElementById("upload_form"),
-            target:document.getElementById("myfile1"),
-            success:function(fileObj){//成功之后的处理，此处有保存文件的逻辑
-                var oUploadResponse = document.getElementById('upload_response');
-                oUploadResponse.innerHTML = fileObj.name;
-                oUploadResponse.style.display = 'block';
-            },
-            fileSelect:function(e){//用户选择文件之后的处理
-                var oFile = e.target.files[0];
-                var oImage = document.getElementById('preview');
-                // prepare HTML5 FileReader
-                var oReader = new FileReader();
-                oReader.onload = function(e){
-                    if (oFile.type == 'image/jpeg'){
-                        oImage.src = e.target.result;
-                        oImage.onload = function () { // binding onload event
-                            console.log(oFile,oReader);
-                        };
-                    }
-                };
-                oReader.readAsDataURL(oFile);
-            },
-            progress:function(e,me){//进度更新
-                if (e.lengthComputable) {
-                    
-                    document.getElementById('progress_percent').innerHTML = me.iPercentComplete.toString() + '%';
-                    document.getElementById('progress').style.width = (me.iPercentComplete * 4).toString() + 'px';
-                    document.getElementById('b_transfered').innerHTML = me.iBytesTransfered;
-                    if (me.iPercentComplete == 100) {
-                        var oUploadResponse = document.getElementById('upload_response');
-                        oUploadResponse.innerHTML = '<h1>Please wait...processing</h1>';
-                        oUploadResponse.style.display = 'block';
-                    }
-                    document.getElementById('speed').innerHTML = me.iSpeed;
-                    document.getElementById('remaining').innerHTML = '| ' + fileUploader.secondsToTime(me.secondsRemaining);
-                } else {
-                    document.getElementById('progress').innerHTML = 'unable to compute';
+    var myUploader = new fileUploader({
+        routerPath:"/files",
+        form:document.getElementById("upload_form"),
+        target:document.getElementById("myfile1"),
+        onSuccess:function(fileObj){//成功之后的处理，此处有保存文件的逻辑
+            var oUploadResponse = document.getElementById('upload_response');
+            oUploadResponse.innerHTML = fileObj.name;
+            oUploadResponse.style.display = 'block';
+            document.getElementById('hidden_file').innerHTML = fileobj.name;//用于用户使用/保存
+        },
+        fileSelect:function(e){//用户选择文件之后的处理
+            var oFile = e.target.files[0];
+            var oImage = document.getElementById('preview');
+            // prepare HTML5 FileReader
+            var oReader = new FileReader();
+            oReader.onload = function(e){
+                if (oFile.type == 'image/jpeg'){
+                    oImage.src = e.target.result;
+                    oImage.onload = function () { // binding onload event
+                        console.log(oFile,oReader);
+                    };
                 }
-            },
-            error:function(e){//出错
-                document.getElementById('error2').style.display = 'block';
-            },
-            abort:function(e){//中断
-                document.getElementById('abort').style.display = 'block';
-            },
-        });
+            };
+            oReader.readAsDataURL(oFile);
+        },
+        onProgress:function(e,me){//进度更新
+            if (e.lengthComputable) {
+                
+                document.getElementById('progress_percent').innerHTML = me.iPercentComplete.toString() + '%';
+                document.getElementById('progress').style.width = (me.iPercentComplete * 4).toString() + 'px';
+                document.getElementById('b_transfered').innerHTML = me.iBytesTransfered;
+                if (me.iPercentComplete == 100) {
+                    var oUploadResponse = document.getElementById('upload_response');
+                    oUploadResponse.innerHTML = '<h1>Please wait...processing</h1>';
+                    oUploadResponse.style.display = 'block';
+                }
+                document.getElementById('speed').innerHTML = me.iSpeed;
+                document.getElementById('remaining').innerHTML = '| ' + fileUploader.secondsToTime(me.secondsRemaining);
+            } else {
+                document.getElementById('progress').innerHTML = 'unable to compute';
+            }
+        },
+        onError:function(e){//出错
+            document.getElementById('error2').style.display = 'block';
+        },
+        onAbort:function(e){//中断
+            document.getElementById('abort').style.display = 'block';
+        },
+    });
 ```
 
 客户端上传文件方法：
@@ -79,7 +80,7 @@ myUploader.startUpload();
 
 客户端覆盖定义上传成功方法：
 ```js
-myUploader.success = function(fileobj){//on success
+myUploader.onSuccess = function(fileobj){//on success
     //fileobj contains name,link,size
     document.getElementById('hidden_file').innerHTML = fileobj.name;//用于用户使用/保存
 }
@@ -89,7 +90,6 @@ myUploader.success = function(fileobj){//on success
 html示例
 ```html
 <form id="upload_form" enctype="multipart/form-data" method="post">
-<div>
     <div>
         <div><label for="myfile1">Please select image file</label></div>
         <div><input type="file" name="myfile1" id="myfile1" /></div>
@@ -120,15 +120,14 @@ html示例
         </div>
         <div id="upload_response"></div>
     </div>
-</div>
-<div>
+</form>
+<form name="user_save_form"  method="post">
     <ul>
         <li>用户名：<input type="text" id="user_save_name"/> </li>
         <li>电话：<input type="number" id="user_save_phone"/> </li>
         <li><button id="user_save_button">保存</button></li>
     </ul>
     <input type="hidden" name ="hidden_file" id ="hidden_file" /><!--存放存储的用户头像-->
-</div>
 </form>
 ```
 js示例
