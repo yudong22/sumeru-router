@@ -25,9 +25,7 @@ sumeru.router.add({
 var myUploader = new fileUploader({
             routerPath:"/files",
             form:document.getElementById("upload_form"),
-            inputFile:document.getElementById("myfile1"),
-            sizeAllowed:"10M",
-            typeAllowed:[],
+            target:document.getElementById("myfile1"),
             success:function(fileObj){//成功之后的处理，此处有保存文件的逻辑
                 var oUploadResponse = document.getElementById('upload_response');
                 oUploadResponse.innerHTML = fileObj.name;
@@ -87,3 +85,131 @@ myUploader.success = function(fileobj){//on success
 }
 ```
 
+### 3. 用户上传头像，一个简单的demo
+html示例
+```html
+<form id="upload_form" enctype="multipart/form-data" method="post">
+    <div>
+        <div><label for="myfile1">Please select image file</label></div>
+        <div><input type="file" name="myfile1" id="myfile1" /></div>
+    </div>
+    <div>
+        <input type="button" id="startupload" value="Upload" />
+    </div>
+    <div id="fileinfo">
+        <div id="filename"></div>
+        <div id="filesize"></div>
+        <div id="filetype"></div>
+        <div id="filedim"></div>
+    </div>
+    <div id="error">You should select valid image files only!</div>
+    <div id="error2">An error occurred while uploading the file</div>
+    <div id="abort">The upload has been canceled by the user or the browser dropped the connection</div>
+    <div id="warnsize">Your file is very big. We can't accept it. Please select more small file</div>
+
+    <div id="progress_info">
+        <div id="progress"></div>
+        <div id="progress_percent">&nbsp;</div>
+        <div class="clear_both"></div>
+        <div>
+            <div id="speed">&nbsp;</div>
+            <div id="remaining">&nbsp;</div>
+            <div id="b_transfered">&nbsp;</div>
+            <div class="clear_both"></div>
+        </div>
+        <div id="upload_response"></div>
+    </div>
+</form>
+<form id="user_save_info" method="post">
+    <ul>
+        <li>用户名：<input type="text" id="user_save_name"/> </li>
+        <li>电话：<input type="number" id="user_save_phone"/> </li>
+        <li><button id="user_save_button">保存</button></li>
+    </ul>
+    <input type="hidden" name ="hidden_file" id ="hidden_file" /><!--存放存储的用户头像-->
+</form>
+```
+js示例
+```js
+    var myUploader = new fileUploader({
+        routerPath:"/files",
+        form:document.getElementById("upload_form"),
+        target:document.getElementById("myfile1"),
+        success:function(fileObj){//成功之后的处理，此处有保存文件的逻辑
+            var oUploadResponse = document.getElementById('upload_response');
+            oUploadResponse.innerHTML = fileObj.name;
+            oUploadResponse.style.display = 'block';
+            document.getElementById('hidden_file').innerHTML = fileobj.name;//用于用户使用/保存
+        },
+        fileSelect:function(e){//用户选择文件之后的处理
+            var oFile = e.target.files[0];
+            var oImage = document.getElementById('preview');
+            // prepare HTML5 FileReader
+            var oReader = new FileReader();
+            oReader.onload = function(e){
+                if (oFile.type == 'image/jpeg'){
+                    oImage.src = e.target.result;
+                    oImage.onload = function () { // binding onload event
+                        console.log(oFile,oReader);
+                    };
+                }
+            };
+            oReader.readAsDataURL(oFile);
+        },
+        progress:function(e,me){//进度更新
+            if (e.lengthComputable) {
+                
+                document.getElementById('progress_percent').innerHTML = me.iPercentComplete.toString() + '%';
+                document.getElementById('progress').style.width = (me.iPercentComplete * 4).toString() + 'px';
+                document.getElementById('b_transfered').innerHTML = me.iBytesTransfered;
+                if (me.iPercentComplete == 100) {
+                    var oUploadResponse = document.getElementById('upload_response');
+                    oUploadResponse.innerHTML = '<h1>Please wait...processing</h1>';
+                    oUploadResponse.style.display = 'block';
+                }
+                document.getElementById('speed').innerHTML = me.iSpeed;
+                document.getElementById('remaining').innerHTML = '| ' + fileUploader.secondsToTime(me.secondsRemaining);
+            } else {
+                document.getElementById('progress').innerHTML = 'unable to compute';
+            }
+        },
+        error:function(e){//出错
+            document.getElementById('error2').style.display = 'block';
+        },
+        abort:function(e){//中断
+            document.getElementById('abort').style.display = 'block';
+        },
+    });
+        
+    var save_user_info = function(){
+        var user = {
+            name:document.getElementById("user_save_name").value,
+            phone:document.getElementById("user_save_phone").value,
+            photo:document.getElementById("hidden_file").value
+        };
+        session.pubuser.add(user);
+        session.pubuser.save();
+    }
+    document.getElementById("user_save_button").addEventListener("click",function(){
+        
+        if (document.getElementById("hidden_file").value == "") {//未上传图片
+            if (document.getElementById("myfile1").value == "") {//未选择图片
+                alert("your photo cant't be empty ");
+                return false;
+            }else{
+                myUploader.success = function(fileObj){//on success
+                    //fileobj contains name,link,size
+                    var oUploadResponse = document.getElementById('upload_response');
+                    oUploadResponse.innerHTML = fileObj.name;
+                    oUploadResponse.style.display = 'block';
+                    document.getElementById('hidden_file').innerHTML = fileObj.name;//用于用户使用/保存
+                    //触发保存
+                    save_user_info();
+                }
+                myUploader.startUpload();//先上传图片，等待返回
+                return false;
+            }
+        }
+        save_user_info();
+    });
+```
