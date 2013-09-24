@@ -89,6 +89,7 @@ myUploader.success = function(fileobj){//on success
 html示例
 ```html
 <form id="upload_form" enctype="multipart/form-data" method="post">
+<div>
     <div>
         <div><label for="myfile1">Please select image file</label></div>
         <div><input type="file" name="myfile1" id="myfile1" /></div>
@@ -119,14 +120,15 @@ html示例
         </div>
         <div id="upload_response"></div>
     </div>
-</form>
-<form id="user_save_info" method="post">
+</div>
+<div>
     <ul>
         <li>用户名：<input type="text" id="user_save_name"/> </li>
         <li>电话：<input type="number" id="user_save_phone"/> </li>
         <li><button id="user_save_button">保存</button></li>
     </ul>
     <input type="hidden" name ="hidden_file" id ="hidden_file" /><!--存放存储的用户头像-->
+</div>
 </form>
 ```
 js示例
@@ -135,7 +137,7 @@ js示例
         routerPath:"/files",
         form:document.getElementById("upload_form"),
         target:document.getElementById("myfile1"),
-        success:function(fileObj){//成功之后的处理，此处有保存文件的逻辑
+        onSuccess:function(fileObj){//成功之后的处理，此处有保存文件的逻辑
             var oUploadResponse = document.getElementById('upload_response');
             oUploadResponse.innerHTML = fileObj.name;
             oUploadResponse.style.display = 'block';
@@ -156,7 +158,7 @@ js示例
             };
             oReader.readAsDataURL(oFile);
         },
-        progress:function(e,me){//进度更新
+        onProgress:function(e,me){//进度更新
             if (e.lengthComputable) {
                 
                 document.getElementById('progress_percent').innerHTML = me.iPercentComplete.toString() + '%';
@@ -173,10 +175,10 @@ js示例
                 document.getElementById('progress').innerHTML = 'unable to compute';
             }
         },
-        error:function(e){//出错
+        onError:function(e){//出错
             document.getElementById('error2').style.display = 'block';
         },
-        abort:function(e){//中断
+        onAbort:function(e){//中断
             document.getElementById('abort').style.display = 'block';
         },
     });
@@ -197,7 +199,7 @@ js示例
                 alert("your photo cant't be empty ");
                 return false;
             }else{
-                myUploader.success = function(fileObj){//on success
+                myUploader.onSuccess = function(fileObj){//on success
                     //fileobj contains name,link,size
                     var oUploadResponse = document.getElementById('upload_response');
                     oUploadResponse.innerHTML = fileObj.name;
@@ -211,5 +213,6 @@ js示例
             }
         }
         save_user_info();
+        return false;
     });
 ```
