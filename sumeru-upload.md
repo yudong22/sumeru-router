@@ -1,99 +1,24 @@
 Clouda提供了从端到云上传文件的方法，使用简单几步的配置即可实现端上的文件上传到托管服务器。
 
-此文档通过一个例子来展示如何通过 Clouda 进行文件上传和管理。
+此文档通过一个例子来展示如何通过 Clouda 进行文件上传。
 
-### 1. 定义文件的数据Model
-在`app/model`目录下定义model,model的名称需要与第二步中model的订阅名称保持一致
-```js
-Model.fileModel = function(exports){
-    exports.config = {
-        fields: [
-            {name: 'name', type: 'string'},
-            {name: 'path', type: 'string'},
-            {name: 'isTmp', type: 'boolean'},
-            {name: 'size', type: 'int'},
-            {name: 'extension',type: 'string'}
-        ]
-    };
-};
-```
-
-### 2. 定义model的订阅，并添加联动方法
-在`app/publish`目录下定义订阅，保存上传文件的信息，用于以后通过浏览器进行更新/删除操作。
-
-```js
-fw.publish('fileModel', 'pub-upload-files', function(callback){
-        var collection = this;
-        collection.find({},function(err, items){
-             callback(items);
-         });
-     },{
-         beforeInsert : function(serverCollection, structData, userinfo,  callback){
-             //插入文件，补充数据字段信息
-             if (typeof structData.name == 'string'){
-                 var match = structData.name.match(/^(.*?)([^\/]+)$/);
-                 if (match){
-                    structData.name=match[2];
-                    structData.path=match[1];
-                    structData.isTmp=true;
-                    callback(structData);
-                 }
-             }
-         },
-        beforeDelete : function(serverCollection, structData, userinfo,  callback){
-            //删除记录的同时删除文件本身
-            getDb(serverCollection.baseModel,function(err, handler){
-                handler.find({smr_id:ObjectId(structData.smr_id)},{},function(err, data){
-                    data.toArray(function(terr, result){
-                        if (result[0] && typeof result[0].name == 'string'){
-                            if (fs.existsSync(result[0].path + result[0].name)) {
-                                fs.unlink(result[0].path + result[0].name, function (err) {
-                                    if (err) throw err;
-                                    fw.log('successfully deleted '+result[0].name);
-                                });
-                            }
-                        }
-                    });
-                    callback();//find成功了就进入下一环节
-                });
-            });
-        },
-        beforeUpdate : function(serverCollection, structData, userinfo, callback){
-            //更新记录的同时更新文件
-            getDb(serverCollection.baseModel,function(err, handler){
-                handler.find({smr_id:ObjectId(structData.smr_id)},{},function(err, data){
-                    data.toArray(function(terr, result){
-                        if (result[0] && typeof result[0].name == 'string'){
-                            if (fs.existsSync(result[0].path + result[0].name) && !fs.existsSync(fw.config.get("upload_dir")+ "/"+structData.name)) {
-                                fs.renameSync(result[0].path + result[0].name, fw.config.get("upload_dir")+ "/"+structData.name);
-                                if (result[0].isTmp) {
-                                    structData.isTmp = false;
-                                    structData.path = fw.config.get("upload_dir")+ "/";
-                                }
-                                callback(structData);//进入下一环节
-                            }
-                        }else{
-                            return false;
-                        }
-                    });
-                });
-            });
-        },
-     });
-
-```
-### 3. router定义上传
+### 1. router定义上传
 在`app/config/router.js`中，指定`uri`用于处理文件上传，可由开发者通过`pattern`自由定义。
 
 ```js
 sumeru.router.add({
     {
         pattern    :   '/files', //pattern用于定义匹配上传文件的uri
-        type  :   'file'
+        type  :   'file',
+        max_size_allowed:'10M',//support k,m
+        file_ext_allowed:'' ,//allow all use '' , other use js array ["jpg",'gif','png','ico']
+        rename:function(filename){//if rename_function is defined,the uploaded filename will be deal with this function.
+            return "public/"+filename;
+        }
     }
 });
 ```
-### 4. 浏览器端上传文件
+### 2. 浏览器端上传文件
 此模块支持`显示进度`，`无刷新上传`，`自定义样式/uri`，`上传文件的服务端保存`。
 
 ```js
@@ -103,24 +28,13 @@ var myUploader = new fileUploader({
             inputFile:document.getElementById("myfile1"),
             sizeAllowed:"10M",
             typeAllowed:[],
-            success:function(e){//成功之后的处理，此处有保存文件的逻辑
+            success:function(fileObj){//成功之后的处理，此处有保存文件的逻辑
                 var oUploadResponse = document.getElementById('upload_response');
-                oUploadResponse.innerHTML = e.target.responseText;
+                oUploadResponse.innerHTML = fileObj.name;
                 oUploadResponse.style.display = 'block';
-                //保存文件，session.fileObj 是前面定义的订阅
-                //e.target.responseText 是服务器返回的文件路径
-                session.fileObj.add({name:e.target.responseText,size:this.fileSize,extension:this.extension});
-                session.fileObj.save();
-                
-            
-                document.getElementById('progress_percent').innerHTML = '100%';
-                document.getElementById('progress').style.width = '400px';
-                document.getElementById('filesize').innerHTML = this.fileSize;
-                document.getElementById('remaining').innerHTML = '| 00:00:00';
             },
-            select:function(e){//用户选择文件之后的处理
+            fileSelect:function(e){//用户选择文件之后的处理
                 var oFile = e.target.files[0];
-                
                 var oImage = document.getElementById('preview');
                 // prepare HTML5 FileReader
                 var oReader = new FileReader();
@@ -131,7 +45,6 @@ var myUploader = new fileUploader({
                             console.log(oFile,oReader);
                         };
                     }
-                    
                 };
                 oReader.readAsDataURL(oFile);
             },
@@ -166,21 +79,11 @@ var myUploader = new fileUploader({
 myUploader.startUpload();
 ```
 
-客户端修改文件方法：
+客户端覆盖定义上传成功方法：
 ```js
-session.fileObj.update({
-    name   : newvalue//新文件名
-},{
-    smr_id : e.target.getAttribute('data-id')//smr_id db中的唯一id
-});
-session.fileObj.save();
-```
-
-客户端删除文件方法：
-```js
-session.fileObj.destroy({
-    smr_id  : e.target.getAttribute('data-id')//smr_id db中的唯一id
-});
-session.fileObj.save();
+myUploader.success = function(fileobj){//on success
+    //fileobj contains name,link,size
+    document.getElementById('hidden_file').innerHTML = fileobj.name;//用于用户使用/保存
+}
 ```
 
