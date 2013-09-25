@@ -12,8 +12,9 @@ sumeru.router.add({
         type  :   'file',
         max_size_allowed:'10M',//support k,m
         file_ext_allowed:'' ,//allow all use '' , other use js array ["jpg",'gif','png','ico']
+        upload_dir:"public",//default dir is public
         rename:function(filename){//if rename_function is defined,the uploaded filename will be deal with this function.
-            return "public/"+filename;
+            return filename;
         }
     }
 });
