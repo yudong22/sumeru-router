@@ -23,7 +23,7 @@ sumeru.router.add({
 此模块支持`显示进度`，`无刷新上传`，`自定义样式/uri`，`上传文件的服务端保存`。
 
 ```js
-    var myUploader = new fileUploader({
+    var myUploader = Library.fileUploader.init({
             routerPath:"/files",
             form:document.getElementById("upload_form"),
             // target:document.getElementById("myfile1"),
@@ -61,7 +61,7 @@ sumeru.router.add({
                         oUploadResponse.style.display = 'block';
                     }
                     document.getElementById('speed').innerHTML = me.iSpeed;
-                    document.getElementById('remaining').innerHTML = '| ' + fileUploader.secondsToTime(me.secondsRemaining);
+                    document.getElementById('remaining').innerHTML = '| ' + Library.fileUploader.secondsToTime(me.secondsRemaining);
                 } else {
                     document.getElementById('progress').innerHTML = 'unable to compute';
                 }
@@ -214,7 +214,7 @@ App.upLoad = sumeru.controller.create(function(env, session, params) {
         doRender(view);
     };
     env.onready = function(doc) {
-        var myUploader = new fileUploader({
+        var myUploader = Library.fileUploader.init({
             routerPath:"/files",
             form:document.getElementById("upload_form"),
             // target:document.getElementById("myfile1"),
@@ -252,7 +252,7 @@ App.upLoad = sumeru.controller.create(function(env, session, params) {
                         oUploadResponse.style.display = 'block';
                     }
                     document.getElementById('speed').innerHTML = me.iSpeed;
-                    document.getElementById('remaining').innerHTML = '| ' + fileUploader.secondsToTime(me.secondsRemaining);
+                    document.getElementById('remaining').innerHTML = '| ' + Library.fileUploader.secondsToTime(me.secondsRemaining);
                 } else {
                     document.getElementById('progress').innerHTML = 'unable to compute';
                 }
