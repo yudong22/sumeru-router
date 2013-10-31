@@ -308,5 +308,5 @@ App.upLoad = sumeru.controller.create(function(env, session, params) {
 
 run之后访问下面的网址,测试上传功能
 ```code
-http://localhost:8080/upload
+http://localhost:8080/myupload
 ```
