@@ -27,11 +27,11 @@ sumeru.router.add({
             routerPath:"/files",
             form:document.getElementById("upload_form"),
             // target:document.getElementById("myfile1"),
-            onSuccess:function(e){//成功之后的处理，此处有保存文件的逻辑
+            onSuccess:function(filelink){//成功之后的处理，此处有保存文件的逻辑
                 var oUploadResponse = document.getElementById('upload_response');
-                oUploadResponse.innerHTML = e.target.responseText;
+                oUploadResponse.innerHTML = filelink;
                 oUploadResponse.style.display = 'block';
-                document.getElementById('hidden_file').value = e.target.responseText;//用于用户使用/保存
+                document.getElementById('hidden_file').value = filelink;//用于用户使用/保存
             },
             fileSelect:function(e){//用户选择文件之后的处理
                 var oFile = e.target.files[0];
@@ -66,8 +66,9 @@ sumeru.router.add({
                     document.getElementById('progress').innerHTML = 'unable to compute';
                 }
             },
-            onError:function(e){//出错
-                document.getElementById('error2').style.display = 'block';
+            onError:function(msg){//出错
+                var oUploadResponse = document.getElementById('upload_response');
+                oUploadResponse.innerHTML = msg.toString();
             },
             onAbort:function(e){//中断
                 document.getElementById('abort').style.display = 'block';
@@ -194,16 +195,21 @@ App.upLoad = sumeru.controller.create(function(env, session, params) {
     var view = 'upload';
 
     var getUsers = function(){
-        
+        session.bind('bindtest',{
+            string:"string...."
+        });
         session.pubuser = env.subscribe("user-has-photo",function(collection, info){
             session.bind('user_table', {
                 data    :   collection.getData()//collection.find({'int >=': session.get('int')})
             });
         });
+        
     };
-    
+    var bindTest = function(){
+        
+    };
     env.onload = function() {
-        return [getUsers];
+        return [getUsers,bindTest];
     };
 
     env.onerror = function() {
@@ -218,11 +224,11 @@ App.upLoad = sumeru.controller.create(function(env, session, params) {
             routerPath:"/files",
             form:document.getElementById("upload_form"),
             // target:document.getElementById("myfile1"),
-            onSuccess:function(e){//成功之后的处理，此处有保存文件的逻辑
+            onSuccess:function(filelink){//成功之后的处理，此处有保存文件的逻辑
                 var oUploadResponse = document.getElementById('upload_response');
-                oUploadResponse.innerHTML = e.target.responseText;
+                oUploadResponse.innerHTML = filelink;
                 oUploadResponse.style.display = 'block';
-                document.getElementById('hidden_file').value = e.target.responseText;//用于用户使用/保存
+                document.getElementById('hidden_file').value = filelink;//用于用户使用/保存
             },
             fileSelect:function(e){//用户选择文件之后的处理
                 var oFile = e.target.files[0];
@@ -257,8 +263,9 @@ App.upLoad = sumeru.controller.create(function(env, session, params) {
                     document.getElementById('progress').innerHTML = 'unable to compute';
                 }
             },
-            onError:function(e){//出错
-                document.getElementById('error2').style.display = 'block';
+            onError:function(msg){//出错
+                var oUploadResponse = document.getElementById('upload_response');
+                oUploadResponse.innerHTML = msg.toString();
             },
             onAbort:function(e){//中断
                 document.getElementById('abort').style.display = 'block';
@@ -285,12 +292,12 @@ App.upLoad = sumeru.controller.create(function(env, session, params) {
                     alert("your photo cant't be empty ");
                     return false;
                 }else{
-                    myUploader.onSuccess = function(e){//on success
+                    myUploader.onSuccess = function(filelink){//on success
                         //fileobj contains name,link,size
                         var oUploadResponse = document.getElementById('upload_response');
-                        oUploadResponse.innerHTML = e.target.responseText;
+                        oUploadResponse.innerHTML = filelink;
                         oUploadResponse.style.display = 'block';
-                        document.getElementById('hidden_file').value = e.target.responseText;//用于用户使用/保存
+                        document.getElementById('hidden_file').value = filelink;//用于用户使用/保存
                         //触发保存
                         save_user_info();
                     };
