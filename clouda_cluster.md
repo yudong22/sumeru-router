@@ -15,9 +15,9 @@
 * #### server_config/database.js
 
 ```code
-    sumeru..config.cluster({
+    sumeru.config.cluster({
       enable : true,
-      host : '127.0.0.1',
+      host : 'your_redis_ip',
       port : 6379
       dbname : 'your_dbname',
       user: 'your_user',
