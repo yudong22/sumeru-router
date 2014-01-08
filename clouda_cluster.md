@@ -19,8 +19,8 @@
       enable : true,
       host : 'your_redis_ip',
       port : 6379
-      dbname : 'your_dbname',
-      user: 'your_user',
-      password: 'your_password',
+      dbname : 'your_redis_dbname',
+      user: 'your_redis_user',
+      password: 'your_redis_password',
   });
 ```
