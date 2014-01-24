@@ -1,4 +1,4 @@
-## clouda在BAE上开启socket的配置
+## clouda在BAE上开启websocket的配置
 
 ### 在BAE扩展服务中添加开通Port服务
 
